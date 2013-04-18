@@ -52,8 +52,10 @@ class YamlValidator
     
     errors = validate_root_language(yaml_object, File.basename(filename))
 
-    yaml_object = yaml_object[yaml_object.keys[0]]
-    yaml_object = yaml_object[yaml_object.keys[0]]
+    # Move to the third root in the yml file
+    [1, 2].each do 
+      yaml_object = yaml_object[yaml_object.keys[0]]
+    end
     yaml_object = Helpers.normalize_yaml(yaml_object)
     errors += validate_yaml_object('', yaml_object)
     if @options[:show_missing]
