@@ -10,11 +10,12 @@ def main
     ARGV.delete '--no-missing'
   end
 
-  root_path = '.'
-  root_path = ARGV[0] if ARGV.length > 0
+  root_path = './config/locales'
+  base_file = ARGV[0].to_s if ARGV.length > 0
+  new_file = ARGV[1].to_s if ARGV.length > 0
   
-  puts "Validating #{root_path}...\n\n".colorize(:blue).underline
-  validator = YamlValidator.new(root_path, :show_missing => show_missing)
+  puts "Validating #{root_path}...\n\n".colorize(:cyan).underline
+  validator = YamlValidator.new(root_path, base_file, new_file, :show_missing => show_missing)
   errors = validator.validate()
   puts errors
   
