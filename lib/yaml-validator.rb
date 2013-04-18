@@ -5,19 +5,20 @@ require_relative './pluralization-validator'
 
 class YamlValidator
   
-  def initialize(root_path, options = {})
+  def initialize(root_path, base_file, new_file, options = {})
     @options = options
     @options[:show_missing] ||= true
     @root_path = root_path
+    @base_file = base_file
+    @new_file = new_file
   end
   
   def en
     return @en unless @en.nil?
 
-    fullpath = File.join(@root_path, 'en.yml')
+    fullpath = File.join(@root_path, @base_file)
     return nil unless File.exists?(fullpath)
-
-    @en = YAML.load_file(fullpath)['en']
+    @en = YAML.load_file(fullpath)['en'][@base_file.split('.')[0]]
     @en = Helpers.normalize_yaml(@en)
   end
   
@@ -30,10 +31,11 @@ class YamlValidator
     if en_with_vars.nil?
       return ["no en.yml file in the directory (an en.yml file is required as reference)"]
     end
-    yml_files = File.join(@root_path, '*.yml')
+    yml_files = File.join(@root_path, @new_file.length > 0 ? @new_file : '*.yml' )
     errors = []
-    Dir[yml_files].each do |filename|
-      next if File.basename(filename) == 'en.yml'
+    filter = /\/([a-z]*)\.(en|es)\.(yml)\z/
+    Dir[yml_files].grep(filter).each do |filename|
+      next if File.basename(filename) == @base_file
       errors.concat validate_yaml(filename)
     end
     errors
@@ -50,7 +52,10 @@ class YamlValidator
     
     errors = validate_root_language(yaml_object, File.basename(filename))
 
-    yaml_object = yaml_object[yaml_object.keys[0]]
+    # Move to the third root in the yml file
+    [1, 2].each do 
+      yaml_object = yaml_object[yaml_object.keys[0]]
+    end
     yaml_object = Helpers.normalize_yaml(yaml_object)
     errors += validate_yaml_object('', yaml_object)
     if @options[:show_missing]
@@ -66,7 +71,7 @@ class YamlValidator
 
     lang = yaml_object.keys.first
     if lang != file_name.split(".").first
-      errors << "invalid root language (#{lang})"
+      errors << "different root language (#{lang})"
     end
 
     errors
@@ -134,7 +139,8 @@ class YamlValidator
       if is_pluralization
         return []
       else
-        return ["#{full_key} doesn't exist in en.yml"]
+        # return ["#{full_key} doesn't exist in #{@base_file}"]
+        return []
       end
     end
 
