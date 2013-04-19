@@ -4,6 +4,8 @@ require_relative './helpers'
 require_relative './pluralization-validator'
 
 class YamlValidator
+
+  SKIP_KEYS = [".symptoms.", ".triggers."]
   
   def initialize(root_path, base_file, new_file, options = {})
     @options = options
@@ -50,7 +52,7 @@ class YamlValidator
       return [e.message.sub(/^\([^)]+\)/, filename)]
     end
     
-    errors = validate_root_language(yaml_object, File.basename(filename))
+    errors = []
 
     # Move to the third root in the yml file
     [1, 2].each do 
@@ -64,17 +66,6 @@ class YamlValidator
     end
     
     errors.map { |err| "#{filename}: #{err}" }
-  end
-  
-  def validate_root_language(yaml_object, file_name)
-    errors = []
-
-    lang = yaml_object.keys.first
-    if lang != file_name.split(".").first
-      errors << "different root language (#{lang})"
-    end
-
-    errors
   end
 
   def validate_yaml_object(full_key, yaml_object)
@@ -105,7 +96,7 @@ class YamlValidator
       full_subkey = (full_key.empty?) ? key : "#{full_key}.#{key}"
       if value.is_a? String or value.is_a? Symbol
         if self.class.find_key_in_yaml_object(full_subkey, yaml_object).nil?
-          errors << "missing translation for #{full_subkey} ('#{value}')"
+          errors << "missing translation for #{full_subkey} ('#{value}')" unless SKIP_KEYS.any? {|k| full_subkey.include? k} 
         end
       else
         errors.concat find_missing_translations_in_en_object(full_subkey, value, yaml_object)
