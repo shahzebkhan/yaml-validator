@@ -1,3 +1,0 @@
-en:
-  parent1:
-    key1: "Hello, %{name}, this is %{day_of_week}"

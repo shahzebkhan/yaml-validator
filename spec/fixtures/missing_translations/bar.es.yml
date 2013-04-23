@@ -1,0 +1,9 @@
+es:
+  bar:
+    translations:
+      key1: 'value1'
+      parent1:
+        subkey1: 'value1'
+      parent3:
+        - 1
+        - heb two
