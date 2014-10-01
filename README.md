@@ -43,8 +43,28 @@ nl.yml: parent_key.key1: missing variable 'var_with_typo' (available options var
 Changelog
 =========
 
+Ideomed Customization
+---------------------
+
+Validates Abriiz-specific condition/locale combinations.
+Given the following file tree:
+
+```
+config/
+  locales/
+    asthma.en.yml
+    life.en.yml
+    life.es.yml
+    waipointes.en.yml
+    ...
+```
+Validates all files against asthma.en.yml
+
+
 0.1.0
 -----
 
 * Added missing translations validation (strings that appear in en.yml but not in the other strings)
+
+
 
